@@ -317,7 +317,14 @@ def load_movielens_data(filepath: str = None, sample_frac: float = 1.0) -> pd.Da
     else:
         # Load real MovieLens data
         print(f"Loading MovieLens data from {filepath}")
-        data = pd.read_csv(filepath, sep='\t', names=['user_id', 'item_id', 'rating', 'timestamp'])
+        data = pd.read_csv(filepath)
+        # Rename columns to match our expected format
+        data = data.rename(columns={
+            'userId': 'user_id',
+            'movieId': 'item_id',
+            'rating': 'rating',
+            'timestamp': 'timestamp'
+        })
     
     # Sample data if requested
     if sample_frac < 1.0:
@@ -442,9 +449,25 @@ def hyperparameter_search(train_data: List[Tuple], val_data: List[Tuple]) -> Dic
         'reg_lambda': [0.001, 0.01, 0.1]
     }
     
-    best_params = None
-    best_score = float('inf')
     results = []
+    
+    # Initialize with first configuration
+    best_params = {
+        'n_factors': param_grid['n_factors'][0],
+        'learning_rate': param_grid['learning_rate'][0],
+        'reg_lambda': param_grid['reg_lambda'][0]
+    }
+    
+    # Train initial model to get baseline score
+    initial_model = MatrixFactorization(
+        n_factors=best_params['n_factors'],
+        learning_rate=best_params['learning_rate'],
+        reg_lambda=best_params['reg_lambda'],
+        n_epochs=50,
+        verbose=False
+    )
+    initial_model.fit(train_data, val_data)
+    best_score = initial_model.val_losses[-1]
     
     # Grid search
     for n_factors in param_grid['n_factors']:
@@ -491,7 +514,7 @@ def run_baseline_experiment():
     print("="*60)
     
     # Load data
-    data = load_movielens_data(sample_frac=0.3)  # Use 30% for faster experimentation
+    data = load_movielens_data(sample_frac=0.3, filepath="ratings.csv")  # Use 30% for faster experimentation
     
     # Prepare train/validation/test splits
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
@@ -791,7 +814,7 @@ def compare_models():
     print("="*60)
     
     # Load data
-    data = load_movielens_data(sample_frac=0.2)  # Smaller sample for comparison
+    data = load_movielens_data(sample_frac=0.2, filepath="ratings.csv")  # Smaller sample for comparison
     
     # Prepare data
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
