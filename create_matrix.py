@@ -15,7 +15,7 @@ def create_user_item_matrix(df):
     """
     Create a user-item rating matrix from the DataFrame.
     """
-    user_item_matrix = df.pivot(index='user_id', columns='item_id', values='rating')
+    user_item_matrix = df.pivot(index='userId', columns='movieId', values='rating')
     return user_item_matrix
 
 def normalize_matrix(matrix):
