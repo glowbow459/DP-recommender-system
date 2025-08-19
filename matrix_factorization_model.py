@@ -109,8 +109,8 @@ class MatrixFactorization:
         item_ids = [int(x[1]) for x in train_data]
         ratings = [float(x[2]) for x in train_data]
         
-        n_users = max(user_ids) + 1
-        n_items = max(item_ids) + 1
+        n_users = len(user_ids)
+        n_items = len(item_ids)
         global_mean = float(np.mean(ratings))
         
         # Initialize parameters
