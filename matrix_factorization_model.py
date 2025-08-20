@@ -514,7 +514,7 @@ def run_baseline_experiment():
     print("="*60)
     
     # Load data
-    data = load_movielens_data(sample_frac=0.3, filepath="ratings.csv")  # Use 30% for faster experimentation
+    data = load_movielens_data(sample_frac=0.3, filepath="ratings25m.csv")  # Use 30% for faster experimentation
     
     # Prepare train/validation/test splits
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
@@ -814,7 +814,7 @@ def compare_models():
     print("="*60)
     
     # Load data
-    data = load_movielens_data(sample_frac=0.2, filepath="ratings.csv")  # Smaller sample for comparison
+    data = load_movielens_data(sample_frac=0.2, filepath="ratings25m.csv")  # Smaller sample for comparison
     
     # Prepare data
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
