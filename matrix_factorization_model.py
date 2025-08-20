@@ -10,28 +10,22 @@ warnings.filterwarnings('ignore')
 
 class MatrixFactorization:
     """
-    Matrix Factorization model for collaborative filtering using SGD optimization.
-    
-    The model learns latent factor representations for users and items by factorizing
-    the user-item rating matrix R ≈ UV^T where:
-    - U: user factor matrix (n_users x n_factors)
-    - V: item factor matrix (n_items x n_factors)
+    matrix factorization model for collaborative filtering using SGD.
     """
-    
+
     def __init__(self, n_factors: int = 50, learning_rate: float = 0.01, 
                  reg_lambda: float = 0.01, n_epochs: int = 100, 
                  init_std: float = 0.1, verbose: bool = True):
         """
-        Initialize Matrix Factorization model.
-        
+        initialize matrix factorization model.
         Args:
-            n_factors: Number of latent factors
-            learning_rate: Learning rate for SGD
-            reg_lambda: L2 regularization parameter
-            n_epochs: Number of training epochs
-            init_std: Standard deviation for parameter initialization
-            verbose: Whether to print training progress
-        """
+            n_factors is the number of latent factors
+            learning_rate is the learning rate for SGD
+            reg_lambda is the L2 regularization parameter
+            n_epochs is the number of training epochs
+            init_std is the standard deviation for parameter initialization
+            verbose means whether to print training progress ot not
+            """
         self.n_factors = n_factors
         self.learning_rate = learning_rate
         self.reg_lambda = reg_lambda
@@ -51,7 +45,9 @@ class MatrixFactorization:
         self.val_losses = []
         
     def _initialize_parameters(self, n_users: int, n_items: int, global_mean: float):
-        """Initialize model parameters."""
+        """
+        initialize model parameters
+        """
         # Ensure parameters are integers
         n_users = int(n_users)
         n_items = int(n_items)
@@ -66,7 +62,9 @@ class MatrixFactorization:
         self.global_bias = global_mean
         
     def _predict_rating(self, user_id: int, item_id: int) -> float:
-        """Predict rating for a user-item pair."""
+        """
+        predict rating for a user item pair
+        """
         # Convert IDs to integers for indexing
         user_idx = int(user_id)
         item_idx = int(item_id)
@@ -77,7 +75,9 @@ class MatrixFactorization:
         return prediction
     
     def _compute_loss(self, ratings_data: List[Tuple], include_reg: bool = True) -> float:
-        """Compute RMSE loss on given rating data."""
+        """
+        compute RMSE loss on given rating data
+        """
         total_error = 0
         for user_id, item_id, rating in ratings_data:
             prediction = self._predict_rating(user_id, item_id)
@@ -98,11 +98,10 @@ class MatrixFactorization:
     
     def fit(self, train_data: List[Tuple], val_data: List[Tuple] = None):
         """
-        Train the matrix factorization model using SGD.
-        
+        train the matrix factorization model using SGD
         Args:
-            train_data: List of (user_id, item_id, rating) tuples
-            val_data: Optional validation data for monitoring
+            train_data is a list of (user_id, item_id, rating) tuples
+            val_data is the optional validation data for monitoring
         """
         # Extract dimensions and compute global mean
         user_ids = [int(x[0]) for x in train_data]
@@ -169,7 +168,9 @@ class MatrixFactorization:
                         print(f"Epoch {epoch:3d}: Train RMSE={train_loss:.4f}")
     
     def predict(self, user_id: int, item_id: int) -> float:
-        """Predict rating for a single user-item pair."""
+        """
+        predict rating for a single user item pair
+        """
         if (user_id >= len(self.user_factors) or 
             item_id >= len(self.item_factors) or
             user_id < 0 or item_id < 0):
@@ -178,7 +179,9 @@ class MatrixFactorization:
         return self._predict_rating(user_id, item_id)
     
     def predict_batch(self, test_data: List[Tuple]) -> np.ndarray:
-        """Predict ratings for a batch of user-item pairs."""
+        """
+        predict ratings for a batch of user item pairs
+        """
         predictions = []
         for user_id, item_id, _ in test_data:
             predictions.append(self.predict(user_id, item_id))
@@ -187,15 +190,14 @@ class MatrixFactorization:
     def get_user_recommendations(self, user_id: int, n_recommendations: int = 10,
                                 known_items: set = None) -> List[Tuple]:
         """
-        Get top-N recommendations for a user.
-        
+        get top N recommendations for a user
         Args:
-            user_id: User ID
-            n_recommendations: Number of recommendations
-            known_items: Set of items already rated by user (to exclude)
+            user_id is the user ID
+            n_recommendations is the number of recommendations
+            known_items is a set of items already rated by user
             
         Returns:
-            List of (item_id, predicted_rating) tuples
+            list of (item_id, predicted_rating) tuples
         """
         if user_id >= len(self.user_factors):
             return []
@@ -216,11 +218,15 @@ class MatrixFactorization:
 
 
 class RecommenderEvaluator:
-    """Evaluation utilities for recommender systems."""
+    """
+    evaluation utilities for recommender systems
+    """
     
     @staticmethod
     def compute_rating_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
-        """Compute rating prediction metrics."""
+        """
+        compute rating prediction metrics
+        """
         rmse = np.sqrt(mean_squared_error(y_true, y_pred))
         mae = mean_absolute_error(y_true, y_pred)
         
@@ -231,7 +237,9 @@ class RecommenderEvaluator:
     
     @staticmethod
     def precision_at_k(recommended_items: List, relevant_items: set, k: int) -> float:
-        """Compute Precision@K."""
+        """
+        compute Precision@K
+        """
         if k == 0:
             return 0.0
         
@@ -241,7 +249,9 @@ class RecommenderEvaluator:
     
     @staticmethod
     def recall_at_k(recommended_items: List, relevant_items: set, k: int) -> float:
-        """Compute Recall@K."""
+        """
+        Compute Recall@K
+        """
         if len(relevant_items) == 0:
             return 0.0
         
@@ -251,7 +261,9 @@ class RecommenderEvaluator:
     
     @staticmethod
     def ndcg_at_k(recommended_items: List, relevant_items: set, k: int) -> float:
-        """Compute NDCG@K (simplified binary relevance)."""
+        """
+        compute NDCG@K (simplified binary relevance)
+        """
         if k == 0 or len(relevant_items) == 0:
             return 0.0
         
@@ -271,14 +283,12 @@ class RecommenderEvaluator:
 
 def load_movielens_data(filepath: str = None, sample_frac: float = 1.0) -> pd.DataFrame:
     """
-    Load MovieLens dataset. If no filepath provided, creates synthetic data.
-    
+    load movielens dataset if there is no filepath create data
     Args:
-        filepath: Path to MovieLens ratings file
-        sample_frac: Fraction of data to sample (for faster experimentation)
-    
+        filepath is the path to the movielens ratings file
+        sample_frac is the fraction of data to sample
     Returns:
-        DataFrame with columns: user_id, item_id, rating, timestamp
+        dataframe with  the next columns: user_id, item_id, rating, timestamp
     """
     if filepath is None:
         # Create synthetic MovieLens-like data for demonstration
@@ -348,15 +358,13 @@ def load_movielens_data(filepath: str = None, sample_frac: float = 1.0) -> pd.Da
 def prepare_train_test_data(data: pd.DataFrame, test_size: float = 0.2, 
                           random_state: int = 42) -> Tuple[List[Tuple], List[Tuple]]:
     """
-    Prepare training and testing data.
-    
+    prepare training and testing data
     Args:
-        data: DataFrame with user_id, item_id, rating columns
-        test_size: Fraction of data for testing
-        random_state: Random seed
-    
+        data is the dataframe with user_id, item_id and rating columns
+        test_size is the fraction of data for testing
+        random_state is a random seed
     Returns:
-        Tuple of (train_data, test_data) as lists of (user_id, item_id, rating) tuples
+        tuple of (train_data, test_data) as lists of (user_id, item_id, rating) tuples
     """
     train_df, test_df = train_test_split(data, test_size=test_size, random_state=random_state)
     
@@ -372,16 +380,14 @@ def prepare_train_test_data(data: pd.DataFrame, test_size: float = 0.2,
 def evaluate_ranking_metrics(model: MatrixFactorization, test_data: List[Tuple], 
                            train_data: List[Tuple], k_values: List[int] = [5, 10, 20]) -> Dict:
     """
-    Evaluate ranking metrics (Precision@K, Recall@K, NDCG@K).
-    
+    evaluate ranking metrics (Precision@K, Recall@K, NDCG@K)
     Args:
-        model: Trained matrix factorization model
-        test_data: Test ratings
-        train_data: Training ratings (to exclude from recommendations)
-        k_values: List of K values to evaluate
-    
+        model is the trained matrix factorization model
+        test_data is the test ratings
+        train_data is the training ratings
+        k_values is a list of K values to evaluate
     Returns:
-        Dictionary with ranking metrics
+        dictionary with ranking metrics
     """
     # Create user-item mappings
     train_user_items = {}
@@ -435,10 +441,9 @@ def evaluate_ranking_metrics(model: MatrixFactorization, test_data: List[Tuple],
 
 def hyperparameter_search(train_data: List[Tuple], val_data: List[Tuple]) -> Dict:
     """
-    Perform basic hyperparameter search.
-    
+    perform basic hyperparameter search.
     Returns:
-        Best hyperparameters and their validation performance
+        best hyperparameters and their validation performance
     """
     print("\nPerforming hyperparameter search...")
     
@@ -508,13 +513,13 @@ def hyperparameter_search(train_data: List[Tuple], val_data: List[Tuple]) -> Dic
 
 
 def run_baseline_experiment():
-    """Run complete baseline experiment."""
+    """run complete baseline experiment"""
     print("="*60)
     print("PHASE 3: BASELINE MATRIX FACTORIZATION RECOMMENDER")
     print("="*60)
     
     # Load data
-    data = load_movielens_data(sample_frac=0.3, filepath="ratings25m.csv")  # Use 30% for faster experimentation
+    data = load_movielens_data(sample_frac=0.3, filepath="ratings.csv")  # Use 30% for faster experimentation
     
     # Prepare train/validation/test splits
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
@@ -619,249 +624,8 @@ def run_baseline_experiment():
     return final_model, rating_metrics, ranking_metrics, best_params
 
 
-# Neural Collaborative Filtering Alternative
-class NeuralCollaborativeFiltering:
-    """
-    Simple Neural Collaborative Filtering implementation using numpy.
-    This serves as an alternative to matrix factorization.
-    """
-    
-    def __init__(self, n_factors: int = 50, hidden_dims: List[int] = [128, 64], 
-                 learning_rate: float = 0.001, reg_lambda: float = 0.01,
-                 n_epochs: int = 100, verbose: bool = True):
-        """
-        Initialize Neural CF model.
-        
-        Args:
-            n_factors: Embedding dimension for users and items
-            hidden_dims: Hidden layer dimensions for MLP
-            learning_rate: Learning rate
-            reg_lambda: L2 regularization
-            n_epochs: Training epochs
-            verbose: Print progress
-        """
-        self.n_factors = n_factors
-        self.hidden_dims = hidden_dims
-        self.learning_rate = learning_rate
-        self.reg_lambda = reg_lambda
-        self.n_epochs = n_epochs
-        self.verbose = verbose
-        
-        # Model parameters
-        self.user_embedding = None
-        self.item_embedding = None
-        self.mlp_weights = []
-        self.mlp_biases = []
-        
-        # Training history
-        self.train_losses = []
-        self.val_losses = []
-    
-    def _sigmoid(self, x):
-        """Sigmoid activation function."""
-        return 1 / (1 + np.exp(-np.clip(x, -500, 500)))
-    
-    def _relu(self, x):
-        """ReLU activation function."""
-        return np.maximum(0, x)
-    
-    def _initialize_parameters(self, n_users: int, n_items: int):
-        """Initialize neural network parameters."""
-        # Ensure parameters are integers
-        n_users = int(n_users)
-        n_items = int(n_items)
-        
-        # Embedding layers
-        self.user_embedding = np.random.normal(0, 0.1, (n_users, self.n_factors))
-        self.item_embedding = np.random.normal(0, 0.1, (n_items, self.n_factors))
-        
-        # MLP layers
-        input_dim = self.n_factors * 2  # Concatenated user and item embeddings
-        
-        self.mlp_weights = []
-        self.mlp_biases = []
-        
-        prev_dim = input_dim
-        for hidden_dim in self.hidden_dims:
-            self.mlp_weights.append(np.random.normal(0, 0.1, (prev_dim, hidden_dim)))
-            self.mlp_biases.append(np.zeros(hidden_dim))
-            prev_dim = hidden_dim
-        
-        # Output layer
-        self.mlp_weights.append(np.random.normal(0, 0.1, (prev_dim, 1)))
-        self.mlp_biases.append(np.zeros(1))
-    
-    def _forward(self, user_id: int, item_id: int) -> float:
-        """Forward pass through the network."""
-        # Convert IDs to integers for indexing
-        user_idx = int(user_id)
-        item_idx = int(item_id)
-        
-        # Get embeddings
-        user_emb = self.user_embedding[user_idx]
-        item_emb = self.item_embedding[item_idx]
-        
-        # Concatenate embeddings
-        x = np.concatenate([user_emb, item_emb])
-        
-        # Forward through MLP
-        for i, (W, b) in enumerate(zip(self.mlp_weights[:-1], self.mlp_biases[:-1])):
-            x = self._relu(np.dot(x, W) + b)
-        
-        # Output layer
-        output = np.dot(x, self.mlp_weights[-1]) + self.mlp_biases[-1]
-        return output[0]
-    
-    def fit(self, train_data: List[Tuple], val_data: List[Tuple] = None):
-        """Train the neural collaborative filtering model."""
-        # Extract dimensions
-        user_ids = [x[0] for x in train_data]
-        item_ids = [x[1] for x in train_data]
-        
-        n_users = int(max(user_ids)) + 1
-        n_items = int(max(item_ids)) + 1
-        
-        # Initialize parameters
-        self._initialize_parameters(n_users, n_items)
-        
-        if self.verbose:
-            print(f"Training Neural Collaborative Filtering:")
-            print(f"  Users: {n_users}, Items: {n_items}")
-            print(f"  Architecture: {self.n_factors*2} -> {' -> '.join(map(str, self.hidden_dims))} -> 1")
-        
-        # Training loop
-        for epoch in range(self.n_epochs):
-            # Shuffle training data
-            np.random.shuffle(train_data)
-            
-            total_loss = 0
-            for user_id, item_id, rating in train_data:
-                # Convert IDs to integers
-                user_idx = int(user_id)
-                item_idx = int(item_id)
-                
-                # Forward pass
-                prediction = self._forward(user_idx, item_idx)
-                error = rating - prediction
-                total_loss += error ** 2
-                
-                # Simplified gradient updates (this is a basic implementation)
-                # In practice, you'd implement proper backpropagation
-                gradient_scale = self.learning_rate * error
-                
-                # Update embeddings (simplified)
-                self.user_embedding[user_idx] += gradient_scale * 0.1 * np.random.normal(0, 0.01, self.n_factors)
-                self.item_embedding[item_idx] += gradient_scale * 0.1 * np.random.normal(0, 0.01, self.n_factors)
-            
-            # Record losses
-            if epoch % 10 == 0 or epoch == self.n_epochs - 1:
-                train_rmse = np.sqrt(total_loss / len(train_data))
-                self.train_losses.append(train_rmse)
-                
-                if val_data:
-                    val_loss = 0
-                    for user_id, item_id, rating in val_data:
-                        pred = self._forward(user_id, item_id)
-                        val_loss += (rating - pred) ** 2
-                    val_rmse = np.sqrt(val_loss / len(val_data))
-                    self.val_losses.append(val_rmse)
-                    
-                    if self.verbose:
-                        print(f"Epoch {epoch:3d}: Train RMSE={train_rmse:.4f}, Val RMSE={val_rmse:.4f}")
-                else:
-                    if self.verbose:
-                        print(f"Epoch {epoch:3d}: Train RMSE={train_rmse:.4f}")
-    
-    def predict(self, user_id: int, item_id: int) -> float:
-        """Predict rating for a user-item pair."""
-        if (user_id >= len(self.user_embedding) or 
-            item_id >= len(self.item_embedding) or
-            user_id < 0 or item_id < 0):
-            return 3.5  # Return average rating for unknown users/items
-        
-        return self._forward(user_id, item_id)
-    
-    def predict_batch(self, test_data: List[Tuple]) -> np.ndarray:
-        """Predict ratings for a batch of user-item pairs."""
-        predictions = []
-        for user_id, item_id, _ in test_data:
-            predictions.append(self.predict(user_id, item_id))
-        return np.array(predictions)
-    
-    def get_user_recommendations(self, user_id: int, n_recommendations: int = 10,
-                                known_items: set = None) -> List[Tuple]:
-        """Get top-N recommendations for a user."""
-        if user_id >= len(self.user_embedding):
-            return []
-        
-        if known_items is None:
-            known_items = set()
-        
-        predictions = []
-        for item_id in range(len(self.item_embedding)):
-            if item_id not in known_items:
-                pred_rating = self.predict(user_id, item_id)
-                predictions.append((item_id, pred_rating))
-        
-        predictions.sort(key=lambda x: x[1], reverse=True)
-        return predictions[:n_recommendations]
-
-
-def compare_models():
-    """Compare Matrix Factorization vs Neural Collaborative Filtering."""
-    print("\n" + "="*60)
-    print("MODEL COMPARISON: MF vs Neural CF")
-    print("="*60)
-    
-    # Load data
-    data = load_movielens_data(sample_frac=0.2, filepath="ratings25m.csv")  # Smaller sample for comparison
-    
-    # Prepare data
-    temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
-    train_data_df, val_data_df = train_test_split(temp_data, test_size=0.25, random_state=42)
-    
-    train_data = [(row['user_id'], row['item_id'], row['rating']) for _, row in train_data_df.iterrows()]
-    val_data = [(row['user_id'], row['item_id'], row['rating']) for _, row in val_data_df.iterrows()]
-    test_data = [(row['user_id'], row['item_id'], row['rating']) for _, row in test_data_df.iterrows()]
-    
-    # Train Matrix Factorization
-    print("\nTraining Matrix Factorization...")
-    mf_model = MatrixFactorization(n_factors=50, learning_rate=0.01, 
-                                  reg_lambda=0.01, n_epochs=100, verbose=False)
-    mf_start = time.time()
-    mf_model.fit(train_data, val_data)
-    mf_time = time.time() - mf_start
-    
-    # Train Neural CF
-    print("Training Neural Collaborative Filtering...")
-    ncf_model = NeuralCollaborativeFiltering(n_factors=50, hidden_dims=[128, 64],
-                                            learning_rate=0.001, n_epochs=50, verbose=False)
-    ncf_start = time.time()
-    ncf_model.fit(train_data, val_data)
-    ncf_time = time.time() - ncf_start
-    
-    # Evaluate both models
-    test_ratings = np.array([rating for _, _, rating in test_data])
-    
-    mf_predictions = mf_model.predict_batch(test_data)
-    mf_metrics = RecommenderEvaluator.compute_rating_metrics(test_ratings, mf_predictions)
-    
-    ncf_predictions = ncf_model.predict_batch(test_data)
-    ncf_metrics = RecommenderEvaluator.compute_rating_metrics(test_ratings, ncf_predictions)
-    
-    # Print comparison
-    print(f"\nModel Comparison Results:")
-    print(f"{'Metric':<15} {'Matrix Fact.':<12} {'Neural CF':<12}")
-    print("-" * 40)
-    print(f"{'RMSE':<15} {mf_metrics['RMSE']:<12.4f} {ncf_metrics['RMSE']:<12.4f}")
-    print(f"{'MAE':<15} {mf_metrics['MAE']:<12.4f} {ncf_metrics['MAE']:<12.4f}")
-    print(f"{'Train Time (s)':<15} {mf_time:<12.2f} {ncf_time:<12.2f}")
-    
-    return mf_model, ncf_model
-
-
 def analyze_model_properties(model: MatrixFactorization):
-    """Analyze properties of the trained model."""
+    """analyze properties of the trained model"""
     print(f"\n" + "="*50)
     print("MODEL ANALYSIS")
     print("="*50)
@@ -916,7 +680,6 @@ def analyze_model_properties(model: MatrixFactorization):
 
 
 def main():
-    """Main function to run Phase 3 baseline experiments."""
     # Set random seed for reproducibility
     np.random.seed(42)
     
@@ -929,8 +692,7 @@ def main():
     # Compare different models
     print(f"\n{'='*60}")
     print("ADDITIONAL MODEL COMPARISON")
-    mf_model, ncf_model = compare_models()
-    
+
     # Summary for Phase 4 preparation
     print(f"\n{'='*60}")
     print("PHASE 3 SUMMARY - READY FOR DIFFERENTIAL PRIVACY")
