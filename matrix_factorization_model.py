@@ -636,5 +636,6 @@ if __name__ == "__main__":
     parser.add_argument('--bigger_dataset', action='store_true', 
                         help='Use the 1 Million movielens dataset instead of the 100k dataset')
     args = parser.parse_args()
-
+    print("Usage: python matrix_factorization_model.py [--use-best-params] [--bigger_dataset]")
+    print(f"Running with best params: {args.use_best_params}, bigger dataset: {args.bigger_dataset}")
     main(use_best_params=args.use_best_params, use_bigger_dataset=args.bigger_dataset)
