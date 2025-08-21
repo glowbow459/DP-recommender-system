@@ -840,7 +840,7 @@ def visualize_privacy_utility_tradeoff(results: List[Dict]):
 def compare_privacy_and_non_privacy_models():
     """compare between privacy and non privacy model"""
     
-    data = load_movielens_data(sample_frac=0.1, filepath="ratings.csv")
+    data = load_movielens_data(sample_frac=0.1, filepath="ratings1M.csv")
     
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
     train_data_df, val_data_df = train_test_split(temp_data, test_size=0.25, random_state=42)
