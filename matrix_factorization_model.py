@@ -467,10 +467,10 @@ def hyperparameter_search(train_data: List[Tuple], val_data: List[Tuple]) -> Dic
     return best_params, results
 
 
-def run_baseline_experiment(use_best_params: bool = False):
+def run_baseline_experiment(use_best_params: bool = False, use_bigger_dataset: bool = False):
     """run complete baseline experiment"""
-
-    data = load_movielens_data(sample_frac=0.3, filepath="ratings1M.csv")
+    filepath = "ratings.csv" if not use_bigger_dataset else "ratings1M.csv"
+    data = load_movielens_data(sample_frac=0.3, filepath="filepath")
 
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
     train_data_df, val_data_df = train_test_split(temp_data, test_size=0.25, random_state=42)
@@ -614,10 +614,10 @@ def analyze_model_properties(model: MatrixFactorization):
     plt.show()
 
 
-def main(use_best_params: bool = False):
+def main(use_best_params: bool = False, use_bigger_dataset: bool = False):
     np.random.seed(42)
 
-    baseline_model, rating_metrics, ranking_metrics, best_params = run_baseline_experiment(use_best_params)
+    baseline_model, rating_metrics, ranking_metrics, best_params = run_baseline_experiment(use_best_params, use_bigger_dataset)
 
     analyze_model_properties(baseline_model)
 
@@ -633,6 +633,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Matrix Factorization Recommender')
     parser.add_argument('--use-best-params', action='store_true',
                         help='Use best known hyperparameters instead of searching')
+    parser.add_argument('--bigger_dataset', action='store_true', 
+                        help='Use the 1 Million movielens dataset instead of the 100k dataset')
     args = parser.parse_args()
 
-    main(use_best_params=False)
+    main(use_best_params=args.use_best_params, use_bigger_dataset=args.bigger_dataset)
