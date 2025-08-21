@@ -470,7 +470,7 @@ def hyperparameter_search(train_data: List[Tuple], val_data: List[Tuple]) -> Dic
 def run_baseline_experiment(use_best_params: bool = False, use_bigger_dataset: bool = False):
     """run complete baseline experiment"""
     filepath = "ratings.csv" if not use_bigger_dataset else "ratings1M.csv"
-    data = load_movielens_data(sample_frac=0.3, filepath="filepath")
+    data = load_movielens_data(sample_frac=0.3, filepath=filepath)
 
     temp_data, test_data_df = train_test_split(data, test_size=0.2, random_state=42)
     train_data_df, val_data_df = train_test_split(temp_data, test_size=0.25, random_state=42)
